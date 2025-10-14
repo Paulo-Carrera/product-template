@@ -25,7 +25,7 @@ app.post('/create-checkout-session', async (req, res) => {
               description: product.description,
               images: [product.image],
             },
-            unit_amount: parseInt(product.price.replace('$', '')) * 100,
+            unit_amount: Math.round(product.price * 100), // ✅ FIXED: handles number safely
           },
           quantity: 1,
         },
