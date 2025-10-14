@@ -1,16 +1,20 @@
-const express = require('express');
-const Stripe = require('stripe');
-const cors = require('cors');
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import Stripe from 'stripe';
+import cors from 'cors';
+import { insertOrder } from './supabase/insertOrder.js';
+
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(cors()); // ✅ Allow cross-origin requests
+app.use(cors());
 app.use(express.json());
 
 app.post('/create-checkout-session', async (req, res) => {
-  const { product } = req.body;
+  const { product, customerEmail } = req.body;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -25,18 +29,36 @@ app.post('/create-checkout-session', async (req, res) => {
               description: product.description,
               images: [product.image],
             },
-            unit_amount: Math.round(product.price * 100), // ✅ FIXED: handles number safely
+            unit_amount: Math.round(product.price * 100),
           },
           quantity: 1,
         },
       ],
       success_url: 'http://localhost:5173/success',
       cancel_url: 'http://localhost:5173/cancel',
+      customer_email: customerEmail,
+    });
+
+    // Log order attempt to Supabase
+    await insertOrder({
+      productName: product.name,
+      status: 'initiated',
+      email: customerEmail,
+      stripeSessionId: session.id,
     });
 
     res.json({ url: session.url });
   } catch (err) {
     console.error('Stripe error:', err);
+
+    // Optional: log failed attempt
+    await insertOrder({
+      productName: product?.name || 'unknown',
+      status: 'failed',
+      email: customerEmail || 'unknown',
+      stripeSessionId: 'none',
+    });
+
     res.status(500).json({ error: err.message });
   }
 });
