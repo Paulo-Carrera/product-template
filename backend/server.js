@@ -5,7 +5,7 @@ import express from 'express';
 import Stripe from 'stripe';
 import cors from 'cors';
 import { insertOrder } from './supabase/insertOrder.js';
-
+import contactRoute from './routes/contact.js'; // ✅ new import
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -13,6 +13,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 app.use(cors());
 app.use(express.json());
 
+// ✅ Contact form route
+app.use('/contact', contactRoute);
+
+// ✅ Stripe checkout route
 app.post('/create-checkout-session', async (req, res) => {
   const { product, customerEmail } = req.body;
 
@@ -39,7 +43,6 @@ app.post('/create-checkout-session', async (req, res) => {
       customer_email: customerEmail,
     });
 
-    // Log order attempt to Supabase
     await insertOrder({
       productName: product.name,
       status: 'initiated',
@@ -51,7 +54,6 @@ app.post('/create-checkout-session', async (req, res) => {
   } catch (err) {
     console.error('Stripe error:', err);
 
-    // Optional: log failed attempt
     await insertOrder({
       productName: product?.name || 'unknown',
       status: 'failed',
