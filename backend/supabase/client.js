@@ -12,3 +12,4 @@ console.log('Supabase Key:', supabaseKey);
 export function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
+

@@ -1,14 +1,11 @@
 import { getSupabaseClient } from './client.js';
+const supabase = getSupabaseClient();
 
-export async function insertOrder({ productName, status, email, stripeSessionId }) {
-  const supabase = getSupabaseClient();
-  const { error } = await supabase.from('orders').insert([
-    {
-      product_name: productName,
-      status,
-      email,
-      stripe_session_id: stripeSessionId,
-    }
-  ]);
-  if (error) console.error('Supabase insert error:', error);
+export async function insertOrder({ product_name, status, email, stripe_session_id }) {
+  const { data, error } = await supabase
+    .from('orders')
+    .insert([{ product_name, status, email, stripe_session_id }]);
+
+  if (error) console.error('❌ Supabase insert error:', error);
+  return data;
 }
