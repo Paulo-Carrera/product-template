@@ -30,6 +30,7 @@ app.post('/create-checkout-session', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
+      customer_email: customerEmail,
       line_items: [
         {
           price_data: {
@@ -46,13 +47,11 @@ app.post('/create-checkout-session', async (req, res) => {
       ],
       success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: 'http://localhost:5173/cancel',
-      customer_email: customerEmail,
       metadata: {
         productName: product.name,
       },
     });
 
-    // Log initiated order
     await insertOrder({
       product_name: product.name,
       status: 'initiated',
@@ -64,7 +63,6 @@ app.post('/create-checkout-session', async (req, res) => {
   } catch (err) {
     console.error('Stripe error:', err);
 
-    // Log failed attempt
     await insertOrder({
       product_name: product?.name || 'unknown',
       status: 'failed',
@@ -76,7 +74,7 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// Stripe webhook — updates status to 'completed' or 'failed'
+// Stripe webhook — updates status and backfills email/product_name
 app.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -96,71 +94,43 @@ app.post('/webhook', async (req, res) => {
   console.log('📦 Stripe event type:', event.type);
 
   const session = event.data.object;
-  const email = session.customer_details?.email || 'unknown';
+  const email = session.customer_email || 'unknown';
   const product_name = session.metadata?.productName || 'unknown';
 
   console.log('Webhook received session ID:', session.id);
   console.log('Webhook received customer email:', email);
 
-  if (event.type === 'checkout.session.completed') {
-    console.log('✅ Payment completed. Checking for matching order...');
+  const { data: existingOrder, error: fetchError } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('stripe_session_id', session.id)
+    .single();
 
-    const { data: existingOrder, error: fetchError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('stripe_session_id', session.id)
-      .single();
+  if (fetchError || !existingOrder) {
+    console.error('❌ No matching order found for session ID:', session.id);
+  } else {
+    console.log('🔍 Found matching order:', existingOrder);
 
-    if (fetchError || !existingOrder) {
-      console.error('❌ No matching order found for session ID:', session.id);
-    } else {
-      console.log('🔍 Found matching order:', existingOrder);
+    const updatePayload = {
+      status: event.type === 'checkout.session.completed' ? 'completed' : 'failed',
+    };
 
-      const { data: updateData, error: updateError } = await supabase
-        .from('orders')
-        .update({
-          status: 'completed',
-          email,
-          product_name,
-        })
-        .eq('stripe_session_id', session.id);
-
-      if (updateError) {
-        console.error('❌ Supabase update error:', updateError);
-      } else {
-        console.log('✅ Supabase update result:', updateData);
-      }
+    if (!existingOrder.email && email !== 'unknown') {
+      updatePayload.email = email;
     }
-  }
+    if (!existingOrder.product_name && product_name !== 'unknown') {
+      updatePayload.product_name = product_name;
+    }
 
-  if (event.type === 'checkout.session.expired') {
-    console.log('⚠️ Session expired. Checking for matching order...');
-
-    const { data: existingOrder, error: fetchError } = await supabase
+    const { data: updateData, error: updateError } = await supabase
       .from('orders')
-      .select('*')
-      .eq('stripe_session_id', session.id)
-      .single();
+      .update(updatePayload)
+      .eq('stripe_session_id', session.id);
 
-    if (fetchError || !existingOrder) {
-      console.error('❌ No matching order found for session ID:', session.id);
+    if (updateError) {
+      console.error('❌ Supabase update error:', updateError);
     } else {
-      console.log('🔍 Found matching order:', existingOrder);
-
-      const { data: updateData, error: updateError } = await supabase
-        .from('orders')
-        .update({
-          status: 'failed',
-          email,
-          product_name,
-        })
-        .eq('stripe_session_id', session.id);
-
-      if (updateError) {
-        console.error('❌ Supabase update error:', updateError);
-      } else {
-        console.log('✅ Supabase update result:', updateData);
-      }
+      console.log('✅ Supabase update result:', updateData);
     }
   }
 

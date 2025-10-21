@@ -1,6 +1,7 @@
 // src/pages/Success.jsx
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import './Success.css';
 
 export default function Success() {
   const [searchParams] = useSearchParams();

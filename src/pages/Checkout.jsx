@@ -25,7 +25,10 @@ const Checkout = () => {
       const response = await fetch('http://localhost:4242/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: selectedProduct }),
+        body: JSON.stringify({
+           product: selectedProduct,
+           customerEmail: e.target.email.value 
+          }),
       });
 
       const data = await response.json();
@@ -69,6 +72,24 @@ const Checkout = () => {
             <p>{selectedProduct.description}</p>
           </div>
         )}
+
+        <label>
+  Email:
+  <input
+    type="email"
+    name="email"
+    required
+    placeholder="you@example.com"
+    style={{
+      display: 'block',
+      width: '100%',
+      marginBottom: '1rem',
+      padding: '0.5rem',
+      borderRadius: '6px',
+      border: '1px solid #ccc',
+    }}
+  />
+</label>
 
         <button
           type="submit"
