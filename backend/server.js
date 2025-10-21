@@ -9,6 +9,7 @@ import Stripe from 'stripe';
 import cors from 'cors';
 import { insertOrder } from './supabase/insertOrder.js';
 import contactRoute from './routes/contact.js';
+import { sendConfirmationEmail } from './mailer/mailer.js';
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -131,6 +132,16 @@ app.post('/webhook', async (req, res) => {
       console.error('❌ Supabase update error:', updateError);
     } else {
       console.log('✅ Supabase update result:', updateData);
+
+      // ✅ Send confirmation email
+      if (event.type === 'checkout.session.completed' && email !== 'unknown') {
+        try {
+          await sendConfirmationEmail(email, product_name);
+          console.log('📧 Confirmation email sent to:', email);
+        } catch (err) {
+          console.error('❌ Email send error:', err);
+        }
+      }
     }
   }
 
