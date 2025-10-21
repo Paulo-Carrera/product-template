@@ -23,15 +23,26 @@ app.use(express.json());
 // Contact form route
 app.use('/contact', contactRoute);
 
-// Stripe checkout route — logs 'initiated'
+// Stripe checkout route
 app.post('/create-checkout-session', async (req, res) => {
-  const { product, customerEmail } = req.body;
+  const {
+    product,
+    customerEmail,
+    shippingName,
+    shippingAddressLine1,
+    shippingCity,
+    shippingState,
+    shippingPostalCode,
+  } = req.body;
 
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: customerEmail,
+      shipping_address_collection: {
+        allowed_countries: ['US'],
+      },
       line_items: [
         {
           price_data: {
@@ -50,6 +61,11 @@ app.post('/create-checkout-session', async (req, res) => {
       cancel_url: 'http://localhost:5173/cancel',
       metadata: {
         productName: product.name,
+        shippingName,
+        shippingAddressLine1,
+        shippingCity,
+        shippingState,
+        shippingPostalCode,
       },
     });
 
@@ -62,8 +78,6 @@ app.post('/create-checkout-session', async (req, res) => {
 
     res.json({ url: session.url });
   } catch (err) {
-    console.error('Stripe error:', err);
-
     await insertOrder({
       product_name: product?.name || 'unknown',
       status: 'failed',
@@ -75,7 +89,7 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// Stripe webhook — updates status and backfills email/product_name
+// Stripe webhook — updates status and sends confirmation email
 app.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -87,19 +101,20 @@ app.post('/webhook', async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    console.error('❌ Webhook signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
-  console.log('🔥 /webhook route triggered');
-  console.log('📦 Stripe event type:', event.type);
 
   const session = event.data.object;
   const email = session.customer_email || 'unknown';
   const product_name = session.metadata?.productName || 'unknown';
 
-  console.log('Webhook received session ID:', session.id);
-  console.log('Webhook received customer email:', email);
+  const name = session.metadata?.shippingName;
+  const address = {
+    line1: session.metadata?.shippingAddressLine1,
+    city: session.metadata?.shippingCity,
+    state: session.metadata?.shippingState,
+    postal_code: session.metadata?.shippingPostalCode,
+  };
 
   const { data: existingOrder, error: fetchError } = await supabase
     .from('orders')
@@ -107,11 +122,7 @@ app.post('/webhook', async (req, res) => {
     .eq('stripe_session_id', session.id)
     .single();
 
-  if (fetchError || !existingOrder) {
-    console.error('❌ No matching order found for session ID:', session.id);
-  } else {
-    console.log('🔍 Found matching order:', existingOrder);
-
+  if (!fetchError && existingOrder) {
     const updatePayload = {
       status: event.type === 'checkout.session.completed' ? 'completed' : 'failed',
     };
@@ -122,25 +133,23 @@ app.post('/webhook', async (req, res) => {
     if (!existingOrder.product_name && product_name !== 'unknown') {
       updatePayload.product_name = product_name;
     }
+    if (name) {
+      updatePayload.shipping_name = name;
+    }
+    if (address.line1) {
+      updatePayload.shipping_address = JSON.stringify(address);
+    }
 
-    const { data: updateData, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('orders')
       .update(updatePayload)
       .eq('stripe_session_id', session.id);
 
-    if (updateError) {
-      console.error('❌ Supabase update error:', updateError);
-    } else {
-      console.log('✅ Supabase update result:', updateData);
-
-      // ✅ Send confirmation email
-      if (event.type === 'checkout.session.completed' && email !== 'unknown') {
-        try {
-          await sendConfirmationEmail(email, product_name);
-          console.log('📧 Confirmation email sent to:', email);
-        } catch (err) {
-          console.error('❌ Email send error:', err);
-        }
+    if (!updateError && event.type === 'checkout.session.completed' && email !== 'unknown') {
+      try {
+        await sendConfirmationEmail(email, product_name);
+      } catch (err) {
+        console.error('Email send error:', err);
       }
     }
   }
@@ -151,7 +160,6 @@ app.post('/webhook', async (req, res) => {
 // Order details route for frontend success page
 app.get('/order-details', async (req, res) => {
   const { session_id } = req.query;
-  console.log('Looking up order details for session ID:', session_id);
 
   const { data, error } = await supabase
     .from('orders')
@@ -159,14 +167,11 @@ app.get('/order-details', async (req, res) => {
     .eq('stripe_session_id', session_id)
     .single();
 
-  console.log('Supabase returned:', data);
-
   if (error || !data) {
-    console.error('❌ Supabase fetch error:', error);
     return res.status(500).json({ error: 'Order not found' });
   }
 
   res.json(data);
 });
 
-app.listen(4242, () => console.log('🚀 Backend running on http://localhost:4242'));
+app.listen(4242, () => console.log('Backend running on http://localhost:4242'));

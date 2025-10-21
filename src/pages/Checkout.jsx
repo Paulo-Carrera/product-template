@@ -11,7 +11,6 @@ const Checkout = () => {
   const selectedProduct = products.find(p => p.id === parseInt(selectedProductId)) || initialProduct;
 
   useEffect(() => {
-    // Optional: log selected product
     if (selectedProduct) {
       console.log('Selected product:', selectedProduct.name);
     }
@@ -21,14 +20,21 @@ const Checkout = () => {
     e.preventDefault();
     if (!selectedProduct) return;
 
+    const form = e.target;
+
     try {
       const response = await fetch('http://localhost:4242/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-           product: selectedProduct,
-           customerEmail: e.target.email.value 
-          }),
+          product: selectedProduct,
+          customerEmail: form.email.value,
+          shippingName: form.shippingName.value,
+          shippingAddressLine1: form.shippingAddressLine1.value,
+          shippingCity: form.shippingCity.value,
+          shippingState: form.shippingState.value,
+          shippingPostalCode: form.shippingPostalCode.value,
+        }),
       });
 
       const data = await response.json();
@@ -74,22 +80,112 @@ const Checkout = () => {
         )}
 
         <label>
-  Email:
-  <input
-    type="email"
-    name="email"
-    required
-    placeholder="you@example.com"
-    style={{
-      display: 'block',
-      width: '100%',
-      marginBottom: '1rem',
-      padding: '0.5rem',
-      borderRadius: '6px',
-      border: '1px solid #ccc',
-    }}
-  />
-</label>
+          Email:
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="you@example.com"
+            style={{
+              display: 'block',
+              width: '100%',
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+            }}
+          />
+        </label>
+
+        <label>
+          Full Name:
+          <input
+            type="text"
+            name="shippingName"
+            required
+            placeholder="John Doe"
+            style={{
+              display: 'block',
+              width: '100%',
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+            }}
+          />
+        </label>
+
+        <label>
+          Street Address:
+          <input
+            type="text"
+            name="shippingAddressLine1"
+            required
+            placeholder="123 Main St"
+            style={{
+              display: 'block',
+              width: '100%',
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+            }}
+          />
+        </label>
+
+        <label>
+          City:
+          <input
+            type="text"
+            name="shippingCity"
+            required
+            placeholder="Los Angeles"
+            style={{
+              display: 'block',
+              width: '100%',
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+            }}
+          />
+        </label>
+
+        <label>
+          State:
+          <input
+            type="text"
+            name="shippingState"
+            required
+            placeholder="CA"
+            style={{
+              display: 'block',
+              width: '100%',
+              marginBottom: '1rem',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+            }}
+          />
+        </label>
+
+        <label>
+          ZIP Code:
+          <input
+            type="text"
+            name="shippingPostalCode"
+            required
+            placeholder="90001"
+            style={{
+              display: 'block',
+              width: '100%',
+              marginBottom: '1.5rem',
+              padding: '0.5rem',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+            }}
+          />
+        </label>
 
         <button
           type="submit"

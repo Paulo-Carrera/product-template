@@ -1,46 +1,93 @@
-/* Success.css */
+/* src/pages/Success.css */
 
 .success-page {
-  max-width: 600px;
-  margin: 80px auto;
-  padding: 40px;
-  background-color: #fefefe;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  font-family: 'Inter', sans-serif;
-  text-align: center;
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #fdfdfd;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
   color: #333;
 }
 
 .success-page h1 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #4BB543;
-  margin-bottom: 24px;
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.success-page h2 {
+  font-size: 1rem;
+  margin: 1rem 0;
 }
 
 .success-page p {
-  font-size: 16px;
-  margin: 10px 0;
-  color: #555;
+  margin: 1.2rem 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 .success-page strong {
-  color: #222;
+  font-weight: bold;
+}
+
+.success-page hr {
+  border: none;
+  border-top: 1px dashed #aaa;
+  margin: 1rem 0;
+}
+
+.success-page small {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  color: #666;
 }
 
 .success-page a {
-  display: inline-block;
-  margin-top: 30px;
-  padding: 12px 24px;
-  background-color: #4BB543;
-  color: white;
-  font-weight: 500;
-  border-radius: 6px;
+  display: block;
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #0070f3;
   text-decoration: none;
-  transition: background-color 0.3s ease;
+  font-weight: bold;
 }
 
 .success-page a:hover {
-  background-color: #3aa436;
+  text-decoration: underline;
 }
+
+/* Optional: Print button styling */
+.print-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+}
+
+/* Print optimization */
+@media print {
+  body {
+    background: white;
+  }
+
+  .success-page {
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .success-page a,
+  .print-button {
+    display: none;
+  }
+}
+

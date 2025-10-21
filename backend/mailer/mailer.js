@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendConfirmationEmail = async (to, productName) => {
   await transporter.sendMail({
-    from: `"Your Store" <${process.env.EMAIL_USER}>`,
+    from: `"Product Pulse" <${process.env.EMAIL_USER}>`,
     to,
     subject: 'Order Confirmation',
     html: `
