@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Header from '../components/Header.jsx';
 import products from '../data/products.js';
 
 const Checkout = () => {
@@ -46,7 +45,6 @@ const Checkout = () => {
 
   return (
     <div>
-      <Header />
       <h1 style={{ textAlign: 'center' }}>Checkout</h1>
 
       <form onSubmit={handleSubmit} style={{ maxWidth: '400px', margin: '2rem auto' }}>

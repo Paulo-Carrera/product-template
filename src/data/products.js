@@ -11,7 +11,7 @@ const products = [
     id: 2,
     name: 'Posture Corrector',
     description: 'Improves posture and reduces back pain.',
-    price: 19.99,
+    price: 0.50,
     image: 'https://www.spinemd.com/wp-content/uploads/a-girl-in-a-white-t-shirt-wears-a-posture-corrector.jpeg'
   },
   {

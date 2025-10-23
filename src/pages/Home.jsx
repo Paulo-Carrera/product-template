@@ -20,7 +20,6 @@ const Home = () => {
 
   return (
     <div>
-      <Header />
       <main className="home-main">
         <h1 className="home-title">Featured Products</h1>
         <div className="product-grid">

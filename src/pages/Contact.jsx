@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Header from '../components/Header.jsx';
 
 const Contact = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -30,7 +29,6 @@ const Contact = () => {
 
   return (
     <div style={styles.container}>
-      <Header />
       <h1 style={styles.title}>Contact Us</h1>
 
       <form onSubmit={handleSubmit} style={styles.form}>
