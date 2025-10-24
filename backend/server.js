@@ -16,7 +16,9 @@ const supabase = getSupabaseClient(); // ✅ Now safe to initialize
 // Stripe requires raw body for webhook verification
 app.use('/webhook', express.raw({ type: 'application/json' }));
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://product-template-1-psi.vercel.app',
+}));
 app.use(express.json());
 
 // Contact form route

@@ -10,7 +10,7 @@ export default function Success() {
 
   useEffect(() => {
     async function fetchOrder() {
-      const res = await fetch(`http://localhost:4242/order-details?session_id=${sessionId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/order-details?session_id=${sessionId}`);
       const data = await res.json();
       setOrder(data);
     }
