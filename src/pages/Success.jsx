@@ -50,7 +50,7 @@ export default function Success() {
         );
       })()}
 
-      <p><small>Check email for confirmation.</small></p>
+      <p><small><strong>Check email for confirmation.</strong></small></p>
       <a href="/">Back to home</a>
     </div>
   );
