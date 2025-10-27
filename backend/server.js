@@ -16,7 +16,7 @@ const supabase = getSupabaseClient(); // ✅ Now safe to initialize
 // Stripe requires raw body for webhook verification
 app.use('/webhook', express.raw({ type: 'application/json' }));
 
-// CORS setup — supports multiple origins via env
+// ✅ CORS setup — supports multiple origins via env
 const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [];
 
 app.use(cors({
@@ -27,8 +27,13 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// ✅ Handle preflight requests explicitly
+app.options('*', cors());
 
 app.use(express.json());
 
@@ -69,8 +74,8 @@ app.post('/create-checkout-session', async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      success_url: `${process.env.FRONTEND_URL.split(',')[0]}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL.split(',')[0]}/cancel`,
       metadata: {
         productName: product.name,
         shippingName,
