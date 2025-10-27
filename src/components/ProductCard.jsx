@@ -11,6 +11,8 @@ const ProductCard = ({ product }) => {
         body: JSON.stringify({ product }),
       });
 
+      console.log('API base:', import.meta.env.VITE_API_BASE_URL);
+
       const data = await res.json();
 
       if (data.url) {
