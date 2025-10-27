@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config(); // ✅ Load env vars before anything else
+import 'dotenv/config';
 
 import express from 'express';
 import Stripe from 'stripe';
