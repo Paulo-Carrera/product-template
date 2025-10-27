@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import Stripe from 'stripe';
 import cors from 'cors';
+
 import { getSupabaseClient } from './supabase/client.js';
 import { insertOrder } from './supabase/insertOrder.js';
 import contactRoute from './routes/contact.js';
@@ -15,9 +16,20 @@ const supabase = getSupabaseClient(); // ✅ Now safe to initialize
 // Stripe requires raw body for webhook verification
 app.use('/webhook', express.raw({ type: 'application/json' }));
 
+// CORS setup — supports multiple origins via env
+const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [];
+
 app.use(cors({
-  origin: 'https://product-template-1-psi.vercel.app',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
+
 app.use(express.json());
 
 // Contact form route
