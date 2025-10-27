@@ -58,8 +58,8 @@ app.post('/create-checkout-session', async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `{process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `{process.env.FRONTEND_URL}/cancel`,
+      success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       metadata: {
         productName: product.name,
         shippingName,
@@ -193,4 +193,5 @@ app.get('/order-details', async (req, res) => {
   res.json(data);
 });
 
-app.listen(4242, () => console.log('🚀 Backend running on http://localhost:4242'));
+const PORT = process.env.PORT || 4242;
+app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
