@@ -21,9 +21,12 @@ const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [];
 
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('🌐 Incoming origin:', origin);
+    console.log('✅ Allowed origins:', allowedOrigins);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn('❌ CORS blocked:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
