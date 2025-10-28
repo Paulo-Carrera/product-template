@@ -154,10 +154,10 @@ app.post('/webhook', async (req, res) => {
     if (existingOrder) {
       const updatePayload = {
         status: 'completed',
-        ...(email !== 'unknown' && !existingOrder.email && { email }),
-        ...(product_name !== 'unknown' && !existingOrder.product_name && { product_name }),
-        ...(name && { shipping_name: name }),
-        ...(address.line1 && { shipping_address: JSON.stringify(address) }),
+        email,
+        product_name,
+        shipping_name: name,
+        shipping_address: JSON.stringify(address),
       };
 
       console.log('📝 Update payload:', updatePayload);
