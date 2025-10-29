@@ -32,9 +32,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ✅ Preflight handler for OPTIONS requests
-app.options('/*', cors());
-
 // Stripe requires raw body for webhook verification
 app.use('/webhook', express.raw({ type: 'application/json' }));
 
