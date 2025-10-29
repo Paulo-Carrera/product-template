@@ -13,9 +13,6 @@ const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const supabase = getSupabaseClient(); // ✅ Now safe to initialize
 
-// Stripe requires raw body for webhook verification
-app.use('/webhook', express.raw({ type: 'application/json' }));
-
 // ✅ CORS setup — supports multiple origins via env
 const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [];
 
@@ -35,6 +32,13 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// ✅ Preflight handler for OPTIONS requests
+app.options('*', cors());
+
+// Stripe requires raw body for webhook verification
+app.use('/webhook', express.raw({ type: 'application/json' }));
+
+// JSON parser for all other routes
 app.use(express.json());
 
 // Contact form route
