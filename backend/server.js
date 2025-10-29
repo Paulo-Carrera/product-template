@@ -11,7 +11,7 @@ import { sendConfirmationEmail } from './mailer/mailer.js';
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const supabase = getSupabaseClient(); // ✅ Now safe to initialize
+const supabase = getSupabaseClient();
 
 // ✅ CORS setup — supports multiple origins via env
 const allowedOrigins = process.env.FRONTEND_URL?.split(',') || [];
@@ -32,16 +32,13 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Stripe requires raw body for webhook verification
-app.use('/webhook', express.raw({ type: 'application/json' }));
-
-// JSON parser for all other routes
+// ✅ JSON parser for all non-webhook routes
 app.use(express.json());
 
-// Contact form route
+// ✅ Contact form route
 app.use('/contact', contactRoute);
 
-// Stripe checkout route
+// ✅ Stripe checkout route
 app.post('/create-checkout-session', async (req, res) => {
   const {
     product,
@@ -107,8 +104,8 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// Stripe webhook — updates status and sends confirmation email
-app.post('/webhook', async (req, res) => {
+// ✅ Stripe webhook — raw body parser scoped only to this route
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -193,7 +190,7 @@ app.post('/webhook', async (req, res) => {
   res.status(200).json({ received: true });
 });
 
-// Order details route for frontend success page
+// ✅ Order details route for frontend success page
 app.get('/order-details', async (req, res) => {
   const { session_id } = req.query;
 
