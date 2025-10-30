@@ -16,7 +16,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "nodemailer": "^7.0.10",
-    "resend": "^6.2.1",
+    "resend": "^6.3.0",
     "stripe": "^19.1.0"
   },
   "description": ""
