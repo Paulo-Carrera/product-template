@@ -39,8 +39,6 @@ app.use(cors({
 // ✅ JSON parser for all non-webhook routes
 app.use(express.json());
 
-// app.use('/contact', contactRoute); // 🔒 Contact route disabled — using mailto link instead
-
 // ✅ Stripe checkout route
 app.post('/create-checkout-session', async (req, res) => {
   const {
@@ -87,11 +85,19 @@ app.post('/create-checkout-session', async (req, res) => {
       },
     });
 
+    // ✅ Insert shipping info before payment
     await insertOrder({
       product_name: product.name,
       status: 'initiated',
       email: customerEmail,
       stripe_session_id: session.id,
+      shipping_name: shippingName,
+      shipping_address: JSON.stringify({
+        line1: shippingAddressLine1,
+        city: shippingCity,
+        state: shippingState,
+        postal_code: shippingPostalCode,
+      }),
     });
 
     res.json({ url: session.url });
@@ -208,6 +214,12 @@ app.get('/order-details', async (req, res) => {
   }
 
   res.json(data);
+});
+
+// ✅ Ping route for cronjob keep-alive
+app.get('/ping', (req, res) => {
+  console.log('🔁 Ping received at', new Date().toISOString());
+  res.status(200).send('pong');
 });
 
 const PORT = process.env.PORT || 4242;
