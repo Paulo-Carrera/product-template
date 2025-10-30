@@ -1,71 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState(null);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('sending');
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-      setStatus(data.success ? 'sent' : 'error');
-    } catch (err) {
-      console.error('Contact form error:', err);
-      setStatus('error');
-    }
-  };
-
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Contact Us</h1>
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <label style={styles.label}>Name</label>
-        <input
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
+      <div style={styles.form}>
+        <p style={styles.label}>
+          We’d love to hear from you. Click below to email us directly:
+        </p>
 
-        <label style={styles.label}>Email</label>
-        <input
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-
-        <label style={styles.label}>Message</label>
-        <textarea
-          name="message"
-          value={formData.message}
-          onChange={handleChange}
-          required
-          style={styles.textarea}
-        />
-
-        <button type="submit" style={styles.button}>Send</button>
-
-        {status === 'sending' && <p style={styles.status}>Sending...</p>}
-        {status === 'sent' && <p style={{ ...styles.status, color: 'green' }}>✅ Message sent!</p>}
-        {status === 'error' && <p style={{ ...styles.status, color: 'red' }}>❌ Something went wrong.</p>}
-      </form>
+        <a
+          href="mailto:customer.service3252@gmail.com?subject=Contact%20from%20Product%20Pulse"
+          style={styles.button}
+        >
+          Send Us an Email
+        </a>
+      </div>
     </div>
   );
 };
@@ -93,29 +44,14 @@ const styles = {
   },
   label: {
     display: 'block',
-    marginBottom: '0.5rem',
+    marginBottom: '1.5rem',
     fontWeight: 'bold',
     color: '#555',
-  },
-  input: {
-    width: '100%',
-    padding: '0.75rem',
-    marginBottom: '1rem',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    fontSize: '1rem',
-  },
-  textarea: {
-    width: '100%',
-    padding: '0.75rem',
-    height: '120px',
-    marginBottom: '1rem',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    fontSize: '1rem',
-    resize: 'vertical',
+    fontSize: '1.1rem',
+    textAlign: 'center',
   },
   button: {
+    display: 'block',
     width: '100%',
     padding: '0.75rem',
     backgroundColor: '#007bff',
@@ -124,11 +60,8 @@ const styles = {
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
-  },
-  status: {
-    marginTop: '1rem',
     textAlign: 'center',
-    fontWeight: 'bold',
+    textDecoration: 'none',
   },
 };
 
