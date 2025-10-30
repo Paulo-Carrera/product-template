@@ -6,8 +6,8 @@ import cors from 'cors';
 
 import { getSupabaseClient } from './supabase/client.js';
 import { insertOrder } from './supabase/insertOrder.js';
-import contactRoute from './routes/contact.js';
-import { sendConfirmationEmail } from './mailer/mailer.js';
+// import contactRoute from './routes/contact.js'; // 🔒 Archived for future use
+// import { sendConfirmationEmail } from './mailer/mailer.js'; // 🔒 Archived for future use
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -35,8 +35,7 @@ app.use(cors({
 // ✅ JSON parser for all non-webhook routes
 app.use(express.json());
 
-// ✅ Contact form route
-app.use('/contact', contactRoute);
+// app.use('/contact', contactRoute); // 🔒 Contact route disabled — using mailto link instead
 
 // ✅ Stripe checkout route
 app.post('/create-checkout-session', async (req, res) => {
@@ -174,14 +173,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         console.log('✅ Order updated to completed');
       }
 
-      if (email !== 'unknown') {
-        try {
-          await sendConfirmationEmail(email, product_name);
-          console.log('📨 Confirmation email sent');
-        } catch (err) {
-          console.error('❌ Email send error:', err.message);
-        }
-      }
+      // if (email !== 'unknown') {
+      //   try {
+      //     await sendConfirmationEmail(email, product_name);
+      //     console.log('📨 Confirmation email sent');
+      //   } catch (err) {
+      //     console.error('❌ Email send error:', err.message);
+      //   }
+      // }
     } else {
       console.warn('⚠️ No matching order found for session:', sessionId);
     }
